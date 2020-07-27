@@ -1,0 +1,6 @@
+07/22/2020 09:13:30AM - ERROR - _rest_request - Error:{"message":"This user has restricted roles and must be assigned to a team before saving","http_code":400,"http_status":"Bad Request"}
+NoneType: None
+07/22/2020 09:16:08AM - ERROR - _rest_request - Error:{"message":"This user has restricted roles and must be assigned to a team before saving","http_code":400,"http_status":"Bad Request"}
+NoneType: None
+07/22/2020 09:16:47AM - ERROR - _rest_request - Error:{"message":"This user has restricted roles and must be assigned to a team before saving","http_code":400,"http_status":"Bad Request"} for request https://api.veracode.com/api/authn/v2/users/5aeee266-5a0b-4785-9ff2-4162facddbbc?partial=TRUE&incremental=TRUE
+NoneType: None
