@@ -40,12 +40,15 @@ class VeracodeAPI:
         try:
             session = requests.Session()
             session.mount(self.baseurl, HTTPAdapter(max_retries=3))
-            request = requests.Request(method, url, params=params, auth=RequestsAuthPluginVeracodeHMAC(),headers={"User-Agent": "api.py"}
-)
+            request = requests.Request(method, url, params=params, auth=RequestsAuthPluginVeracodeHMAC(),headers={"User-Agent": "api.py"})
             prepared_request = request.prepare()
             r = session.send(prepared_request, proxies=self.proxies)
-            if 200 >= r.status_code <= 299:
-                if r.content is None:
+            if 200 <= r.status_code <= 299:
+                if r.status_code == 204:
+                    #retry after 15 seconds
+                    time.sleep(15)
+                    return self._request(url,method,params)
+                elif r.content is None:
                     logging.debug("HTTP response body empty:\r\n{}\r\n{}\r\n{}\r\n\r\n{}\r\n{}\r\n{}\r\n"
                                   .format(r.request.url, r.request.headers, r.request.body, r.status_code, r.headers, r.content))
                     raise VeracodeAPIError("HTTP response body is empty")
@@ -163,6 +166,17 @@ class VeracodeAPI:
             action = 'comment'
         payload = {'build_id': build_id, 'flaw_id_list': flaw_id_list, 'action': action, 'comment': comment}
         return self._request(self.baseurl + "/updatemitigationinfo.do", "POST", params=payload)
+
+    def generate_archer(self,payload):
+        return self._request(self.baseurl + "/3.0/generatearcherreport.do", "GET",params=payload)
+
+    def download_archer(self, token=None):
+        if token==None:
+            payload = None
+        else:
+            payload = {'token': token}
+
+        return self._request(self.baseurl + "/3.0/downloadarcherreport.do", "GET", params=payload)
 
     # rest apis
 

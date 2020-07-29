@@ -34,8 +34,8 @@ Otherwise you will need to set environment variables before running `vcarcher.py
 Arguments supported include:
 
 * **`--interval`, `-i`** : Interval over which to import data. Options: `last-day`, `last-week`, `last-month`, `all-time`, `range` (default: `last-day`).
-* **`--from-date`, `-f`** : Optional, required if `range` is specified for `-i`. The date on which to begin the import range.
-* **`--to-date, -t`** : Optional, required if `range` is specified for `-i`. The date on which to end the import range.
+* **`--from-date`, `-f`** : Optional, required if `range` is specified for `-i`. The date on which to begin the import range (in `mm-dd-yyyy` format).
+* **`--to-date, -t`** : Optional, required if `range` is specified for `-i`. The date on which to end the import range (in `mm-dd-yyyy` format).
 * **`--scan-type, -s`** : Optional. The scan type to import. Options: `static`, `dynamic`, `manual`.
 
 ## Output
