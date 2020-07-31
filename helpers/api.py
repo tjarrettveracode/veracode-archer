@@ -29,6 +29,7 @@ class VeracodeAPI:
         self.base_rest_url = "https://api.veracode.com/"
         self.base_uri = base_uri = "https://api.veracode.com/appsec/v1/applications"
         self.find_uri = "https://api.veracode.com/appsec/v2/applications"
+        self.retry_seconds = 120
 
     # helper functions
 
@@ -45,8 +46,8 @@ class VeracodeAPI:
             r = session.send(prepared_request, proxies=self.proxies)
             if 200 <= r.status_code <= 299:
                 if r.status_code == 204:
-                    #retry after 15 seconds
-                    time.sleep(15)
+                    #retry after wait
+                    time.sleep(self.retry_seconds)
                     return self._request(url,method,params)
                 elif r.content is None:
                     logging.debug("HTTP response body empty:\r\n{}\r\n{}\r\n{}\r\n\r\n{}\r\n{}\r\n{}\r\n"
