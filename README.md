@@ -46,3 +46,4 @@ The script outputs an XML file that validates to the Veracode [archerreport.xsd 
 
 1. To be able to use the Archer API, you must have an API service account with the Archer Report API role, as described in the [Veracode Help Center](https://help.veracode.com/reader/TNIuE0856bMwmOQldtxbmQ/VCmovHKq7wSDn5AAjxt3nw)
 2. Generation of the output file in the Veracode Platform may take some time. The script will run until the file is received.
+3. The longer the period (and the more applications included), the longer it takes to generate the Archer Report on the Veracode side. If your report generation takes a very long time, try shortening the period or focusing only on certain scan types.
