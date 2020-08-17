@@ -46,7 +46,6 @@ def generate(period,from_date, to_date,scan_type):
     if params=={}:
         paramsobject = None
     else:
-        #paramsobject = json.dumps(params)
         paramsobject = params
 
     # Initiate the Archer report generation job with provided parameters, returns a token
@@ -71,23 +70,33 @@ def downloadreport(token):
 
     return response
 
+def cleanup(report):
+    # selectively manually urldecode some stuff in the header; we don't want to urldecode the whole payload
+    report = report.replace("http&#x3a;&#x2f;&#x2f;","http://")
+    report = report.replace("https&#x3a;&#x2f;&#x2f;","https://")
+    report = report.replace("com&#x2f;","com/")
+    report = report.replace("&#x2f;2001&#x2f;","/2001/")
+    report = report.replace("schema&#x2f;2.0&#x2f;","schema/2.0/")
+    report = report.replace("resource&#x2f;2.0&#x2f;","resource/2.0/")
+    return report
+
 def reportlength(response):
     responseroot = etree.fromstring(response)
     numentries = len(responseroot)
     return numentries
 
 def writereportfile(report):
-    f = open("archerreport.xml","wb")
+    f = open("archerreport.xml","w")
     f.write(report)
     f.close()
-    print("Wrote report to archerreport.xml containing",reportlength(report),"entries")
+    print("Wrote report to archerreport.xml containing",reportlength(report.encode()),"entries")
     return 
 
 def main():
     parser = argparse.ArgumentParser(
         description='This script adds the Security Labs User role for existing users. It can operate on one user '
                     'or all users in the account.')
-    parser.add_argument('-i', '--interval', required=False, help='Interval over which to import data. Options: last-day (default), last-week, last-month, all-time, range.',default='last-day')
+    parser.add_argument('-i', '--interval', required=False, help='Interval over which to import data. Options: last-day (default), last-week, last-month, all-time, range.',default='last-week')
     parser.add_argument('-f', '--from_date', required=False, help='The date (mm-dd-yyyy) on which to begin the import range. Required if -i is "range."')
     parser.add_argument('-t', '--to_date', required=False, help='The date (mm-dd-yyyy) on which to end the import range. Required if -i is "range."')
     parser.add_argument('-s', '--scan_type', required=False, help='The scan type to import. Options: static, dynamic, manual.')
@@ -132,8 +141,10 @@ def main():
                         .format(period,from_date,to_date,scan_type))
         return
     else:
+        # clean up report - urldecode header
+        reportdecode = cleanup(report.decode('utf-8'))
         # write to file
-        writereportfile(report)
+        writereportfile(reportdecode)
 
 if __name__ == '__main__':
     main()
