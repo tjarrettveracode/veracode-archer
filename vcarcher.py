@@ -1,17 +1,16 @@
 import sys
-import requests
 import argparse
 import logging
-from lxml import etree
 import json
 import time
 import datetime
-from veracode_api_signing.plugin_requests import RequestsAuthPluginVeracodeHMAC
 
-from helpers import api
+from lxml import etree
+
+from veracode_api_py import VeracodeAPI as vapi
 
 def creds_expire_days_warning():
-    creds = api.VeracodeAPI().get_creds()
+    creds = vapi().get_creds()
     exp = datetime.datetime.strptime(creds['expiration_ts'], "%Y-%m-%dT%H:%M:%S.%f%z")
     delta = exp - datetime.datetime.now().astimezone() #we get a datetime with timezone...
     if (delta.days < 7):
@@ -49,7 +48,7 @@ def generate(period,from_date, to_date,scan_type):
         paramsobject = params
 
     # Initiate the Archer report generation job with provided parameters, returns a token
-    requestdata = api.VeracodeAPI().generate_archer(payload=paramsobject)
+    requestdata = vapi().generate_archer(payload=paramsobject)
 
     return gettoken(requestdata)
 
@@ -62,7 +61,7 @@ def gettoken(requestdata):
 
 def downloadreport(token):
     # this will retry until the report is ready, with a 15 second wait between retries
-    response = api.VeracodeAPI().download_archer(token)
+    response = vapi().download_archer(token)
 
     # handle case where response is empty
     if (reportlength(response) == 0):
@@ -78,18 +77,33 @@ def cleanup(report):
     report = report.replace("&#x2f;2001&#x2f;","/2001/")
     report = report.replace("schema&#x2f;2.0&#x2f;","schema/2.0/")
     report = report.replace("resource&#x2f;2.0&#x2f;","resource/2.0/")
-    return report
+    report = report.replace("&#x28;","(")
+    report = report.replace("&#x29;",")")
+
+    # remove empty custom fields
+    report_root = etree.fromstring(report.encode())
+    apps = report_root.findall('{http://www.archer-tech.com/}Record')
+    for app in apps:
+        customfields = app.findall('{http://www.archer-tech.com/}customfield')
+        for customfield in reversed(customfields):
+            if customfield.get('value') == '':
+                app.remove(customfield)
+
+    return report_root
 
 def reportlength(response):
-    responseroot = etree.fromstring(response)
-    numentries = len(responseroot)
+    #responseroot = etree.fromstring(response)
+    numentries = len(response)
     return numentries
 
 def writereportfile(report):
-    f = open("archerreport.xml","w")
+    report_tree = etree.ElementTree(report)
+
+    """ f = open("archerreport.xml","w")
     f.write(report)
-    f.close()
-    print("Wrote report to archerreport.xml containing",reportlength(report.encode()),"entries")
+    f.close() """
+    report_tree.write("archerreport.xml",method="xml")
+    print("Wrote report to archerreport.xml containing",reportlength(report),"entries")
     return 
 
 def main():
