@@ -55,7 +55,6 @@ def generate(period,from_date, to_date,scan_type):
 def gettoken(requestdata):
     # processes the response to generatearcherreport.do to identify the token to retrieve the archer job
     archerroot = etree.fromstring(requestdata)
-    attribs = archerroot.attrib
     return archerroot.get('token')
     
 
@@ -92,7 +91,6 @@ def cleanup(report):
     return report_root
 
 def reportlength(response):
-    #responseroot = etree.fromstring(response)
     numentries = len(response)
     return numentries
 
@@ -103,8 +101,7 @@ def writereportfile(report):
     f.write(report)
     f.close() """
     report_tree.write("archerreport.xml",method="xml")
-    print("Wrote report to archerreport.xml containing",reportlength(report),"entries")
-    return 
+    print("Wrote report to archerreport.xml containing",reportlength(report),"entries") 
 
 def main():
     parser = argparse.ArgumentParser(
@@ -153,7 +150,6 @@ def main():
     if report == None:
         logging.warning("No entries in Archer report for this time period:\r\n{}\r\n{}\r\n{}\r\n\r\n{}\r\n"
                         .format(period,from_date,to_date,scan_type))
-        return
     else:
         # clean up report - urldecode header
         reportdecode = cleanup(report.decode('utf-8'))
